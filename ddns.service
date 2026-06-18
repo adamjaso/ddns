@@ -1,0 +1,13 @@
+[Unit]
+Description=Dynamic DNS server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/ddns
+EnvironmentFile=/etc/ddns/env
+Restart=on-failure
+User=ddns
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

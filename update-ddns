@@ -1,0 +1,9 @@
+#!/bin/sh
+USER_PASS="admin:hunter2"
+DDNS_URL="https://example.com/ddns/?domain=home.example.com"
+
+# update ipv4 A record for home.example.com
+curl -4 -s -u "${USER_PASS}" "${DDNS_URL}" >>/var/log/cron.update-ddns.log 2>&1
+
+# update ipv6 AAAA record for home.example.com
+curl -6 -s -u "${USER_PASS}" "${DDNS_URL}" >>/var/log/cron.update-ddns.log 2>&1
