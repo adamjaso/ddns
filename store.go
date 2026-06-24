@@ -23,12 +23,13 @@ type cacheFile struct {
 	AAAA map[string]string `json:"aaaa"`
 }
 
-func storeIP(domain string, ip net.IP) {
+func storeIP(domain string, ip net.IP) (changed bool) {
+	key := storeKey{dnsmessage.TypeAAAA, domain}
 	if ip.To4() != nil {
-		store.Store(storeKey{dnsmessage.TypeA, domain}, ip)
-	} else {
-		store.Store(storeKey{dnsmessage.TypeAAAA, domain}, ip)
+		key.qtype = dnsmessage.TypeA
 	}
+	prev, loaded := store.Swap(key, ip)
+	return !loaded || !prev.(net.IP).Equal(ip)
 }
 
 func resolve(name string, qtype dnsmessage.Type) (net.IP, error) {

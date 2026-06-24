@@ -19,6 +19,7 @@ var (
 	authUserHash   string // "username:sha256hex(password)"
 	noTrustProxy   bool
 	cacheFilePath  string
+	debug          bool
 )
 
 func main() {
@@ -36,6 +37,7 @@ func main() {
 	}
 
 	noTrustProxy = os.Getenv("NO_TRUST_PROXY") == "1"
+	debug = os.Getenv("DEBUG") == "1"
 
 	httpAddr := os.Getenv("HTTP_LISTEN")
 	if httpAddr == "" {
@@ -111,7 +113,10 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("domain %q is not in the allowed list", d), http.StatusForbidden)
 			return
 		}
-		storeIP(d, ip)
+		changed := storeIP(d, ip)
+		if debug || changed {
+			log.Printf("updated %s -> %s", d, ip)
+		}
 		updated = append(updated, d)
 	}
 
@@ -120,8 +125,6 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 			log.Printf("cache write error: %v", err)
 		}
 	}
-
-	log.Printf("updated %v -> %s", updated, ip)
 	fmt.Fprintf(w, "ok: %s -> %s\n", strings.Join(updated, ", "), ip)
 }
 
